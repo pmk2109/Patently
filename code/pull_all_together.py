@@ -21,16 +21,14 @@ def put_into_one_csv(path, paths, out):
     Returns: None
     '''
     fout=open("../data/"+out,"a")
-    # first file:
     for line in open(path+paths[0]):
         fout.write(line)
-    # now the rest:
     for num in xrange(1, len(paths)):
         f = open(path+paths[num])
-        f.next() # skip the header
+        f.next() # skip the header data
         for line in f:
              fout.write(line)
-        f.close() # not really needed
+        f.close()
     fout.close()
 
 
