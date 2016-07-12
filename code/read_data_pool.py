@@ -21,11 +21,25 @@ import parmap
 
 
 def define_data_path(filetype):
+    '''
+    DOCSTRING: define_data_path
+
+    For specified filetype, return all files in 'data/' path.
+
+    Returns: List of file names as string
+    '''
     return [i for i in os.listdir('../data_'+filetype)]
-    # return [i for i in os.listdir('../data') if filetype in i]
 
 
 def open_and_write_xml(path):
+    '''
+    DOCSTRING: open_and_write_xml
+
+    Establish error, subset and total data csvs.
+    Call open_files_xml function and write_xml_data_to_csv function.
+
+    Returns: None
+    '''
     header = ('doc_number', 'date', 'publication_type', 'patent_length',
             'title', 'abstract', 'description', 'claims')
 
@@ -49,27 +63,19 @@ def open_and_write_xml(path):
 
 
 def open_files_xml(path):
+    '''
+    DOCSTRING: open_files_xml
 
-    #given the size of the list that is being created...
-    #maybe i need to think about restructuring this so that
-    #monthly csv's are stored...
+    For specified path, use regex to parse .xml files within
+    the total collection of xml files per file in path.
 
-    #read in file name, get the month, every file in that month
-    #gets its own csv file... when i want to subset, i'll just
-    #select fewer months .. otherwise something gets quite heavy
-    #in my AWS instance
-
-
-    #SECOND THOUGHT ---> run this so that each file gets opened,
-    #and then appended into a csv such that the csv is opened,
-    #files are iterated through
-
+    Returns: List of xml docs.
+    '''
     endtag_regex = re.compile('^<!DOCTYPE (.*) SYSTEM')
     endtag = ''
     counter = 0
     doc_list = []
 
-    #change for EC2 ('../data_xml/')
     with open('../data_xml/'+path, 'r') as f:
         doc = []  # (re)initialize current XML doc to empty string
         for line in f:
@@ -89,6 +95,20 @@ def open_files_xml(path):
 
 
 def write_xml_data_to_csv(path, data, writer, writer_sub):
+    '''
+    DOCSTRING: write_xml_data_to_csv
+
+    Take data from open_files_xml result and iterate over
+    xml docs, converting to string and using ElementTree to
+    establish a root node.  Hunt for relevant information through
+    loops and retain data in variables.
+
+    Make sure encoding is valid and count how mant invalid xml
+    docs there are.  Write to the error, csvs and subset csv files.
+    Subset is every 14th item.
+
+    Returns: 1 if successful, 0 if failure.
+    '''
     try:
         total_counter, invalid_counter = 0, 0
         for d in data:
@@ -122,6 +142,13 @@ def write_xml_data_to_csv(path, data, writer, writer_sub):
 
 
 def write_row(root):
+    '''
+    DOCSTRING: write_row
+
+    For specified root, hunt for particular data.
+
+    Returns: row of data as tuple
+    '''
     abstract = ""
     description = ""
     claims = []
@@ -242,18 +269,9 @@ def main():
     if num_iters > 0 and len(DATA_PATH) >= num_iters:
 
         tic = time.clock()
-        p = Pool(40)
+        p = Pool(40) #change cores depending on machine being used
         results = p.map(open_and_write_xml, DATA_PATH[:num_iters])
         print "Pooled: ", time.clock()-tic
-
-        # tic = time.clock()
-        # for path in DATA_PATH[:num_iters]:
-        #     open_and_write_xml(path)
-        # print "Std: ", time.clock()-tic
-
-
-    # write_data_to_csv('All', 'xml')
-
 
 if __name__ == '__main__':
     main()

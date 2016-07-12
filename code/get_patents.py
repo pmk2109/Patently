@@ -12,13 +12,13 @@ from urlparse import urljoin
 from bs4 import BeautifulSoup
 
 
-
+#assign paths to global variables
 ZIP_PATH = '../code'
 EXTRACT_DATA_PATH = '../data'
 DATA_PATH = '../data/ipg160628.xml'
 
+#this is the current repo of all available patents (1976-present)
 url = 'http://patents.reedtech.com/pgrbft.php'
-
 
 
 def get_data(url):
@@ -52,6 +52,21 @@ def get_data(url):
 
 
 def download(iterable, n_items=None):
+    '''
+    DOCSTRING: download
+
+    For a given BeautifulSoup iterable, find .zip files
+    on the Reed Tech site, retrieve them, extract them,
+    and remove the original zip file from the HD.
+
+    Store log data in a csv so that particular undownloaded /
+    unextracted data can be targeted.
+
+    Number of items to download can be specified.
+
+    Returns: None
+    '''
+
     counter = 0
     for link in iterable:
         if link.text[-4:] == '.zip':

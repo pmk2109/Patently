@@ -3,13 +3,17 @@ import pandas as pd
 
 
 
-def grab_data(path):
-    return [i for i in os.listdir(path)]
-
-
-
 def pull_monthly_to_csv(data_type):
+    '''
+    DOCSTRING: pull_monthly_to_csv
 
+    For the type of data (i.e. csvs, subsets, errors), read
+    into a pandas dataframe and select common months.
+
+    Save monthly dataframes into specified monthly data folders.
+
+    Returns: None
+    '''
     if data_type == 'csvs':
         data_path = '../data/total_parsed_data.csv'
     elif data_type == 'subsets':
@@ -31,8 +35,6 @@ def pull_monthly_to_csv(data_type):
 
 
 def main():
-
-    data_paths = grab_data(data_path)
 
     pull_monthly_to_csv('subsets')
     pull_monthly_to_csv('csvs')
