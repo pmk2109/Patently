@@ -2,6 +2,13 @@ import pandas as pd
 import cPickle as pickle
 
 def load_data(path=None):
+    '''
+    DOCSTRING: load_data
+
+    For specified filetype, return all files in 'data/' path.
+
+    Returns: Dataframe object, abstracts array, descriptions array, claims array
+    '''
     if path == 'subset':
         path = '../data/total_parsed_data_subset.csv'
     elif path == 'total':

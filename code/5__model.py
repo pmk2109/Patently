@@ -18,6 +18,14 @@ import cPickle as pickle
 
 
 def load_data(path=None):
+    '''
+    DOCSTRING: load_data
+
+    Given the 'subset' or 'total' parameter, find the respective .csv file,
+    read into a csv, parse out relevant fields and pickle the relevant objects.
+
+    Returns: Dataframe object, abstracts array, descriptions array, claims array
+    '''
     if path == 'subset':
         path = '../data/total_parsed_data_subset.csv'
     elif path == 'total':
@@ -40,7 +48,15 @@ def load_data(path=None):
 
 
 def vectorize(text, tfidf=None):
+    '''
+    DOCSTRING: vectorize
 
+    Given raw text, and the optional tfidf parameter, use TfidfVectorizer
+    to vectorize text.  If tfidf parameter is present, use its vocab
+    for the input text for relevant comparison.
+
+    Returns: (fit_transformed text, tfidf object), (transformed text, __)
+    '''
     if tfidf:
         return tfidf.transform(text)
     elif tfidf is None:
@@ -50,7 +66,16 @@ def vectorize(text, tfidf=None):
 
 
 def get_similarity(vocab, idea, n_items=5):
+    '''
+    DOCSTRING: get_similarity
 
+    For given vocab as tfidf sparse matrix and an input idea to test,
+    check to make sure the sparse matrix column space is equal and
+    use cosine similarity and n_items parameter to return the
+    relevant cosine similarity scores and indices
+
+    Returns: cosine similarity scores, indices
+    '''
     if vocab.shape[1] == idea.shape[1]:
         pass
     else:
