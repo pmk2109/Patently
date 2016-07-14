@@ -1,5 +1,4 @@
 import re
-import tinys3
 import xml.etree.ElementTree as ET
 from urllib import urlopen, urlretrieve, quote
 from urlparse import urljoin
@@ -16,7 +15,6 @@ from datetime import datetime
 import cPickle as pickle
 from multiprocessing import Pool
 import time
-import parmap
 
 
 
@@ -171,12 +169,30 @@ def write_row(root):
                     except:
                         pass
 
+                    for j in e:
+                        try:
+                            abstract += " " + j.text.strip()
+                        except:
+                            pass
+
         elif child.tag == 'description':
             for c in child:
                 try:
                     description = c.text.strip()
                 except:
                     pass
+                for e in c:
+                    try:
+                        description += " " + e.text.strip()
+                    except:
+                        pass
+
+                    for j in e:
+                        try:
+                            descriptions += " " + j.text.strip()
+                        except:
+                            pass
+
         elif child.tag == 'claims':
             for c in child:
                 # print c.tag, c.attrib
@@ -272,6 +288,8 @@ def main():
         p = Pool(40) #change cores depending on machine being used
         results = p.map(open_and_write_xml, DATA_PATH[:num_iters])
         print "Pooled: ", time.clock()-tic
+
+
 
 if __name__ == '__main__':
     main()

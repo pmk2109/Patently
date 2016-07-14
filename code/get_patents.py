@@ -10,7 +10,7 @@ from datetime import datetime
 from urllib import urlopen, urlretrieve, quote
 from urlparse import urljoin
 from bs4 import BeautifulSoup
-
+from multiprocessing import Pool
 
 #assign paths to global variables
 ZIP_PATH = '../code'
@@ -45,7 +45,10 @@ def get_data(url):
 
     soup = BeautifulSoup(html)
 
-    download(soup.select('a'))
+    p = Pool(40)
+    results = p.map(download, soup.select('a'))
+
+    # download(soup.select('a'))
 
     return
 

@@ -5,7 +5,8 @@ def load_data(path=None):
     '''
     DOCSTRING: load_data
 
-    For specified filetype, return all files in 'data/' path.
+    Given the 'subset' or 'total' parameter, find the respective .csv file,
+    read into a csv, parse out relevant fields and pickle the relevant objects.
 
     Returns: Dataframe object, abstracts array, descriptions array, claims array
     '''

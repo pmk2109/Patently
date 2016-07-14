@@ -79,9 +79,10 @@ def main():
     paths = grab_data(path)
     put_into_one_csv(path, paths, "total_parsed_data_subset")
 
-    p = Pool(2)
-    type_list = ['subsets', 'csvs']
-    results = p.map(pull_monthly_to_csv, type_list)
+    # DON'T WORRY ABOUT MONTHLY FILE, I'LL JUST BE RUNNING ON TOTALS
+    # p = Pool(2)
+    # type_list = ['subsets', 'csvs']
+    # results = p.map(pull_monthly_to_csv, type_list)
 
 
 if __name__ == '__main__':

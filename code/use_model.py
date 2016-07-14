@@ -6,16 +6,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.metrics.pairwise import linear_kernel
 import cPickle as pickle
-
-
-# def load_pickle():
-#     df = pickle.load(open('../data/loaded_data/dataframe.p', 'rb'))
-#     abstracts = pickle.load(open('../data/loaded_data/abstracts.p', 'rb'))
-#     descriptions = pickle.load(open('../data/loaded_data/descriptions.p', 'rb'))
-#     claims = pickle.load(open('../data/loaded_data/claims.p', 'rb'))
-#
-#     return df, abstracts, descriptions, claims
-
+import time
+import msgpack
+import os
 
 def load_data(path=None):
     '''
@@ -91,32 +84,35 @@ def get_similarity(vocab, idea, n_items=5):
 
     #this prints out the top results (unsorted).. these are to be
     #transormed into scores
-    scores = cs_array[ind]
-    indices = ind
+
+    sorted_ind = ind[np.argsort(cs_array[ind])][::-1]
+    scores = cs_array[sorted_ind]
+    indices = sorted_ind
 
     return scores, indices
 
 
 
 
-def main():
+def unpickle():
+    path = os.path.dirname(__file__)
+    abstracts_tfidf = pickle.load(open(path+'/../data/abstracts_tfidf.p', 'rb'))
+    tfidf = pickle.load(open(path+'/../data/tfidf.p', 'rb'))
+    df = pd.read_msgpack(path+'/../data/dataframe.p')
 
-    df, abstracts, descriptions, claims = load_data('subset')
+    return df, abstracts_tfidf, tfidf
 
-    abstracts_tfidf, tfidf = vectorize(abstracts)
 
-    text = ['Blood coagulation cold plasma device that kills bacteria']
-    new_text_tfidf = vectorize(text, tfidf)
 
-    scores, indices = get_similarity(abstracts_tfidf, new_text_tfidf, 5)
+def assemble_results(user_text, num_results, tfidf, abstracts_tfidf, df):
+    new_text_tfidf = vectorize(user_text, tfidf)
+    scores, indices = get_similarity(abstracts_tfidf, new_text_tfidf, num_results)
 
     '''
     [Index([u'doc_number', u'date', u'publication_type', u'patent_length', u'title',
-           u'abstract', u'description', u'claims']
+       u'abstract', u'description', u'claims']
     '''
-    print df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
+    df_results = df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
 
 
-
-if __name__ == '__main__':
-    main()
+    return df_results.to_dict(orient='records')
