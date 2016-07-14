@@ -8,6 +8,11 @@ from sklearn.metrics.pairwise import linear_kernel
 import cPickle as pickle
 import time
 import msgpack
+import gensim, logging
+from nltk.corpus import stopwords
+
+# logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 
 def load_data(path=None):
     '''
@@ -30,12 +35,12 @@ def load_data(path=None):
     df.fillna("", inplace=True)
 
 
-    abstracts = df.abstract.values
-    descriptions = df.description.values
-    claims = df.claims.values
+    df['flat_claims'] = [[e.strip(string.punctuation) for e in w.lower().split()] for w in df.claims.values]
+    df['flat_claims_str'] = df.flat_claims.apply(lambda x: " ".join(x))
+    df['total'] = df.abstract + " " + df.description + " " + df.flat_claims_str
 
-    return df, abstracts, descriptions, claims
 
+    return df
 
 
 
@@ -83,8 +88,10 @@ def get_similarity(vocab, idea, n_items=5):
 
     #this prints out the top results (unsorted).. these are to be
     #transormed into scores
-    scores = cs_array[ind]
-    indices = ind
+    sorted_ind = ind[np.argsort(cs_array[ind])][::-1]
+    scores = cs_array[sorted_ind]
+    indices = sorted_ind
+
 
     return scores, indices
 
@@ -110,8 +117,8 @@ def main():
     if pkl == 'True':
         try:
             print 'Loading data...'
-            df, abstracts, descriptions, claims = load_data(path)
-            abstracts_tfidf, tfidf = vectorize(abstracts)
+            df = load_data(path)
+            total_tfidf, tfidf = vectorize(df.total.values)
 
         except:
             print 'Error loading data!'
@@ -122,14 +129,14 @@ def main():
         # think about writing a pickle function that loops
         # over a set of items passed in
 
-        pickle.dump(abstracts_tfidf, open('../data/abstracts_tfidf.p', 'wb'))
+        pickle.dump(total_tfidf, open('../data/total_tfidf.p', 'wb'))
         pickle.dump(tfidf, open('../data/tfidf.p', 'wb'))
         df.to_msgpack('../data/dataframe.p')
         print 'Finished pickling...'
 
     elif pkl == 'False':
         print 'Unpickling data...'
-        abstracts_tfidf = pickle.load(open('../data/abstracts_tfidf.p', 'rb'))
+        total_tfidf = pickle.load(open('../data/total_tfidf.p', 'rb'))
         tfidf = pickle.load(open('../data/tfidf.p', 'rb'))
         df = pd.read_msgpack('../data/dataframe.p')
     else:
@@ -138,18 +145,28 @@ def main():
 
     toc = time.clock()
     print 'User input (hardcoded)'
-    text = ['Blood coagulation cold plasma device that kills bacteria']
-    new_text_tfidf = vectorize(text, tfidf)
+    text = 'Blood coagulation cold plasma device that kills bacteria'
+    new_text_tfidf = vectorize([text], tfidf)
 
     print 'Getting similarity...'
-    scores, indices = get_similarity(abstracts_tfidf, new_text_tfidf, 5)
+    scores, indices = get_similarity(total_tfidf, new_text_tfidf, 5)
 
     '''
     [Index([u'doc_number', u'date', u'publication_type', u'patent_length', u'title',
        u'abstract', u'description', u'claims']
     '''
-    print df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
+    df_results = df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
+    df_results['score'] = scores
+    print df_results
     print time.clock() - tic
+
+
+
+
+
+
+
+
     return
 
 

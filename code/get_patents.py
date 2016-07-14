@@ -36,7 +36,6 @@ def get_data(url):
         logwriter.writerow(['filename', 'success', 'timestamp'])
 
 
-
     u = urlopen(url)
     try:
         html = u.read().decode('utf-8')
@@ -44,17 +43,18 @@ def get_data(url):
         u.close()
 
     soup = BeautifulSoup(html)
+    # p = Pool(40)
+    # results = p.map(download, soup.select('a'))
 
-    p = Pool(40)
-    results = p.map(download, soup.select('a'))
-
-    # download(soup.select('a'))
-
+    for link in soup.select('a'):
+        download(link)
+    #this works ... but keep in mind, this will be contrained by
+    #network speeds rather than CPUs... so run on
     return
 
 
 
-def download(iterable, n_items=None):
+def download(link, n_items=None):
     '''
     DOCSTRING: download
 
@@ -71,40 +71,34 @@ def download(iterable, n_items=None):
     '''
 
     counter = 0
-    for link in iterable:
-        if link.text[-4:] == '.zip':
-            href = link.get('href')
-            filename = href.rsplit('/', 1)[-1]
-            href = urljoin(url, quote(href))
-            try:
-                urlretrieve(href, filename)
-                zip_ref = zipfile.ZipFile(ZIP_PATH+'/'+filename, 'r')
-                zip_ref.extractall(EXTRACT_DATA_PATH)
-                zip_ref.close()
+    if link.text[-4:] == '.zip':
+        href = link.get('href')
+        filename = href.rsplit('/', 1)[-1]
+        href = urljoin(url, quote(href))
+        try:
+            urlretrieve(href, filename)
+            zip_ref = zipfile.ZipFile(ZIP_PATH+'/'+filename, 'r')
+            zip_ref.extractall(EXTRACT_DATA_PATH)
+            zip_ref.close()
 
-                os.remove(filename)
-                unzipped_fname = filename.split('.')[0] + '.xml'
+            os.remove(filename)
+            unzipped_fname = filename.split('.')[0] + '.xml'
 
-                # move_to_s3(unzipped_fname)
+            # move_to_s3(unzipped_fname)
 
-                # os.remove(EXTRACT_DATA_PATH + '/' + unzipped_fname)
+            # os.remove(EXTRACT_DATA_PATH + '/' + unzipped_fname)
 
-                #write to csv if it succeeded
-                log = open('get_data_logfile.csv','a')
-                log.write(','.join([unzipped_fname, '1', str(datetime.now())+'\n']))
-                log.close()
+            #write to csv if it succeeded
+            log = open('get_data_logfile.csv','a')
+            log.write(','.join([unzipped_fname, '1', str(datetime.now())+'\n']))
+            log.close()
 
-            except:
-                print 'failed to download: {} @ {}'.format(filename,
-                                                        datetime.now())
-                log = open('get_data_logfile.csv','a')
-                log.write(','.join([unzipped_fname, '0', str(datetime.now())+'\n']))
-                log.close()
-
-        if n_items:
-            counter+=1
-            if counter >= n_items:
-                return
+        except:
+            print 'failed to download: {} @ {}'.format(filename,
+                                                    datetime.now())
+            log = open('get_data_logfile.csv','a')
+            log.write(','.join([unzipped_fname, '0', str(datetime.now())+'\n']))
+            log.close()
 
     return
 

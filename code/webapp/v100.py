@@ -21,23 +21,6 @@ df, abstracts_tfidf, tfidf = use_model.unpickle()
 
 
 
-'''
-where does this html go?
-
-<!DOCTYPE html>
-<html lang="en">
-<body>
-    <h1>Enter some text</h1>
-    <form action="." method="POST">
-        <input type="text" name="text">
-        <input type="submit" name="my-form" value="Send">
-    </form>
-</body>
-</html>
-
-'''
-
-
 blueprint = Blueprint(VERSION_STR, __name__)
 @blueprint.route('/return_patent_similarity', methods=['GET'])
 def return_patent_similarity():
@@ -49,7 +32,7 @@ def return_patent_similarity():
 
     responses:
      200:
-       description: Returns a dictionary with 1 key (response) with a corresponding value as a list of dictionaries all containing keys (document number, date issued, title, abstract, description, claims) and values corresponding
+       description: Returns a dictionary with 1 key (response) with a corresponding value as a list of dictionaries all containing keys (document number, date issued, title, abstract, description, claims, scores) and values corresponding
      default:
        description: Unexpected error
        schema:
@@ -80,7 +63,8 @@ def return_patent_similarity():
                     'title' : 'toilet seat light',
                     'abstract' : 'a paragraph of text will go here',
                     'description' : 'many paragraphs of text will go here',
-                    'claims' : 'a couple paragraphs of text will go here'
+                    'claims' : 'a couple paragraphs of text will go here',
+                    'scores' : [decimal point number]
                     },
                     {'doc_number': '123457',
                     'date' : '20160714',
@@ -88,6 +72,7 @@ def return_patent_similarity():
                     'abstract' : 'a paragraph of text will go here',
                     'description' : 'many paragraphs of text will go here',
                     'claims' : 'a couple paragraphs of text will go here'
+                    'scores' : [decimal point number]
                     },
                     {'doc_number': '123458',
                     'date' : '20160715',
@@ -95,6 +80,7 @@ def return_patent_similarity():
                     'abstract' : 'a paragraph of text will go here',
                     'description' : 'many paragraphs of text will go here',
                     'claims' : 'a couple paragraphs of text will go here'
+                    'scores' : [decimal point number]
                     },
                     {'doc_number': '123459',
                     'date' : '20160716',
@@ -102,6 +88,7 @@ def return_patent_similarity():
                     'abstract' : 'a paragraph of text will go here',
                     'description' : 'many paragraphs of text will go here',
                     'claims' : 'a couple paragraphs of text will go here'
+                    'scores' : [decimal point number]
                     },
                     { 'doc_number': '123460',
                     'date' : '20160717',
@@ -109,6 +96,7 @@ def return_patent_similarity():
                     'abstract' : 'a paragraph of text will go here',
                     'description' : 'many paragraphs of text will go here',
                     'claims' : 'a couple paragraphs of text will go here'
+                    'scores' : [decimal point number]
                     }
                 ]
         }

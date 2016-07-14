@@ -113,6 +113,7 @@ def assemble_results(user_text, num_results, tfidf, abstracts_tfidf, df):
        u'abstract', u'description', u'claims']
     '''
     df_results = df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
+    df_results['score'] = scores
 
 
     return df_results.to_dict(orient='records')
