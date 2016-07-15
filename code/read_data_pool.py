@@ -20,7 +20,7 @@ import time
 
 def define_data_path(filetype):
     '''
-    DOCSTRING: define_data_path
+    DOCSTRING: define_data_path(filetype)
 
     For specified filetype, return all files in 'data/' path.
 
@@ -31,7 +31,7 @@ def define_data_path(filetype):
 
 def open_and_write_xml(path):
     '''
-    DOCSTRING: open_and_write_xml
+    DOCSTRING: open_and_write_xml(path)
 
     Establish error, subset and total data csvs.
     Call open_files_xml function and write_xml_data_to_csv function.
@@ -62,7 +62,7 @@ def open_and_write_xml(path):
 
 def open_files_xml(path):
     '''
-    DOCSTRING: open_files_xml
+    DOCSTRING: open_files_xml(path)
 
     For specified path, use regex to parse .xml files within
     the total collection of xml files per file in path.
@@ -94,7 +94,7 @@ def open_files_xml(path):
 
 def write_xml_data_to_csv(path, data, writer, writer_sub):
     '''
-    DOCSTRING: write_xml_data_to_csv
+    DOCSTRING: write_xml_data_to_csv(path, data, writer, writer_sub)
 
     Take data from open_files_xml result and iterate over
     xml docs, converting to string and using ElementTree to
@@ -141,9 +141,9 @@ def write_xml_data_to_csv(path, data, writer, writer_sub):
 
 def write_row(root):
     '''
-    DOCSTRING: write_row
+    DOCSTRING: write_row(root)
 
-    For specified root, hunt for particular data.
+    For specified root, hunt for particular data in the patent space.
 
     Returns: row of data as tuple
     '''
@@ -160,39 +160,57 @@ def write_row(root):
         if child.tag == 'abstract':
             for c in child:
                 try:
-                    abstract = c.text.strip()
+                    abstract += " " + c.text.strip()
                 except:
                     pass
+
                 for e in c:
                     try:
                         abstract += " " + e.text.strip()
                     except:
                         pass
 
-                    for j in e:
+                    for d in e:
                         try:
-                            abstract += " " + j.text.strip()
+                            abstract += " " + d.text.strip()
                         except:
                             pass
 
+                        for f in d:
+                            try:
+                                abstract += " " + f.text.strip()
+                            except:
+                                pass
+
+                            for g in f:
+                                try:
+                                    abstract += " " + g.text.strip()
+                                except:
+                                    pass
+
+                                for h in g:
+                                    try:
+                                        abstract += " " + h.text.strip()
+                                    except:
+                                        pass
+
+                                    for j in h:
+                                        try:
+                                            abstract += " " + j.text.strip()
+                                        except:
+                                            pass
         elif child.tag == 'description':
             for c in child:
                 try:
-                    description = c.text.strip()
+                    description += " " + c.text.strip()
                 except:
                     pass
+
                 for e in c:
                     try:
                         description += " " + e.text.strip()
                     except:
                         pass
-
-                    for j in e:
-                        try:
-                            descriptions += " " + j.text.strip()
-                        except:
-                            pass
-
         elif child.tag == 'claims':
             for c in child:
                 # print c.tag, c.attrib
@@ -270,7 +288,6 @@ def write_row(root):
     new_row.append(claim_elem)
 
     return tuple(new_row)
-
 
 
 

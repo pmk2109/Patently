@@ -4,7 +4,7 @@ from multiprocessing import Pool
 
 def grab_data(path):
     '''
-    DOCSTRING: grab_data
+    DOCSTRING: grab_data(path)
 
     For specified path, return all files in path.
 
@@ -14,7 +14,7 @@ def grab_data(path):
 
 def put_into_one_csv(path, paths, out):
     '''
-    DOCSTRING: put_into_one_csv
+    DOCSTRING: put_into_one_csv(path, paths, out)
 
     For path list (paths) and specified path to save, write to
     out file name.
@@ -35,7 +35,7 @@ def put_into_one_csv(path, paths, out):
 
 def pull_monthly_to_csv(data_type):
     '''
-    DOCSTRING: pull_monthly_to_csv
+    DOCSTRING: pull_monthly_to_csv(data_type)
 
     For the type of data (i.e. csvs, subsets, errors), read
     into a pandas dataframe and select common months.

@@ -16,7 +16,7 @@ from nltk.corpus import stopwords
 
 def load_data(path=None):
     '''
-    DOCSTRING: load_data
+    DOCSTRING: load_data(path=None)
 
     Given the 'subset' or 'total' parameter, find the respective .csv file,
     read into a csv, parse out relevant fields and pickle the relevant objects.
@@ -34,10 +34,11 @@ def load_data(path=None):
     df = pd.read_csv(path)
     df.fillna("", inplace=True)
 
-
+    df['pruned_desc'] = [w.lower().strip(string.punctuation) for w in df.description.values if not w.isdigit()]
+    df['pruned_desc_str'] = df.pruned_desc.apply(lambda x: " ".join(x))
     df['flat_claims'] = [[e.strip(string.punctuation) for e in w.lower().split()] for w in df.claims.values]
     df['flat_claims_str'] = df.flat_claims.apply(lambda x: " ".join(x))
-    df['total'] = df.abstract + " " + df.description + " " + df.flat_claims_str
+    df['total'] = df.abstract + " " + df.pruned_desc_str + " " + df.flat_claims_str
 
 
     return df
@@ -46,7 +47,7 @@ def load_data(path=None):
 
 def vectorize(text, tfidf=None):
     '''
-    DOCSTRING: vectorize
+    DOCSTRING: vectorize(text, tfidf=None)
 
     Given raw text, and the optional tfidf parameter, use TfidfVectorizer
     to vectorize text.  If tfidf parameter is present, use its vocab
@@ -64,7 +65,7 @@ def vectorize(text, tfidf=None):
 
 def get_similarity(vocab, idea, n_items=5):
     '''
-    DOCSTRING: get_similarity
+    DOCSTRING: get_similarity(vocab, idea, n_items=5)
 
     For given vocab as tfidf sparse matrix and an input idea to test,
     check to make sure the sparse matrix column space is equal and
@@ -136,7 +137,7 @@ def main():
 
     elif pkl == 'False':
         print 'Unpickling data...'
-        total_tfidf = pickle.load(open('../data/total_tfidf.p', 'rb'))
+        abstracts_tfidf = pickle.load(open('../data/abstracts_tfidf.p', 'rb'))
         tfidf = pickle.load(open('../data/tfidf.p', 'rb'))
         df = pd.read_msgpack('../data/dataframe.p')
     else:
@@ -149,7 +150,7 @@ def main():
     new_text_tfidf = vectorize([text], tfidf)
 
     print 'Getting similarity...'
-    scores, indices = get_similarity(total_tfidf, new_text_tfidf, 5)
+    scores, indices = get_similarity(abstracts_tfidf, new_text_tfidf, 5)
 
     '''
     [Index([u'doc_number', u'date', u'publication_type', u'patent_length', u'title',

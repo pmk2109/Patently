@@ -12,7 +12,7 @@ import os
 
 def load_data(path=None):
     '''
-    DOCSTRING: load_data
+    DOCSTRING: load_data(path=None)
 
     Given the 'subset' or 'total' parameter, find the respective .csv file,
     read into a csv, parse out relevant fields and pickle the relevant objects.
@@ -42,7 +42,7 @@ def load_data(path=None):
 
 def vectorize(text, tfidf=None):
     '''
-    DOCSTRING: vectorize
+    DOCSTRING: vectorize(text, tfidf=None)
 
     Given raw text, and the optional tfidf parameter, use TfidfVectorizer
     to vectorize text.  If tfidf parameter is present, use its vocab
@@ -60,7 +60,7 @@ def vectorize(text, tfidf=None):
 
 def get_similarity(vocab, idea, n_items=5):
     '''
-    DOCSTRING: get_similarity
+    DOCSTRING: get_similarity(vocab, idea, n_items=5)
 
     For given vocab as tfidf sparse matrix and an input idea to test,
     check to make sure the sparse matrix column space is equal and
@@ -95,6 +95,14 @@ def get_similarity(vocab, idea, n_items=5):
 
 
 def unpickle():
+    '''
+    DOCSTRING: unpickle()
+
+    Unpickle tfidf model, [abstract/total] tfidf matrix and unpack
+    dataframe object.
+
+    Returns: dataframe, [abstract/total] tfidf matrix, tfidf model
+    '''
     path = os.path.dirname(__file__)
     abstracts_tfidf = pickle.load(open(path+'/../data/abstracts_tfidf.p', 'rb'))
     tfidf = pickle.load(open(path+'/../data/tfidf.p', 'rb'))
@@ -104,9 +112,19 @@ def unpickle():
 
 
 
-def assemble_results(user_text, num_results, tfidf, abstracts_tfidf, df):
+def assemble_results(user_text, num_results, tfidf, matrix, df):
+    '''
+    DOCSTRING: assemble_results(user_text, num_results, tfidf, matrix, dataframe)
+
+    For a given user text as a list of one element of type string,
+    transform the text using the provided tfidf model and call the
+    get_similarity function using the matrix, transformed user_text,
+    and the number of results requested.
+
+    Returns: results in a dictionary format
+    '''
     new_text_tfidf = vectorize(user_text, tfidf)
-    scores, indices = get_similarity(abstracts_tfidf, new_text_tfidf, num_results)
+    scores, indices = get_similarity(matrix, new_text_tfidf, num_results)
 
     '''
     [Index([u'doc_number', u'date', u'publication_type', u'patent_length', u'title',

@@ -23,7 +23,7 @@ url = 'http://patents.reedtech.com/pgrbft.php'
 
 def get_data(url):
     '''
-    DOCSTRING: get_data
+    DOCSTRING: get_data(url)
 
     Collect data from provided url (in this case Reed Tech) in the form
     of .zip files, extract and move to S3 Bucket named 'patentgrants'
@@ -54,11 +54,11 @@ def get_data(url):
 
 
 
-def download(link, n_items=None):
+def download(link):
     '''
-    DOCSTRING: download
+    DOCSTRING: download(link)
 
-    For a given BeautifulSoup iterable, find .zip files
+    For a given BeautifulSoup link, find .zip files
     on the Reed Tech site, retrieve them, extract them,
     and remove the original zip file from the HD.
 
@@ -84,10 +84,6 @@ def download(link, n_items=None):
             os.remove(filename)
             unzipped_fname = filename.split('.')[0] + '.xml'
 
-            # move_to_s3(unzipped_fname)
-
-            # os.remove(EXTRACT_DATA_PATH + '/' + unzipped_fname)
-
             #write to csv if it succeeded
             log = open('get_data_logfile.csv','a')
             log.write(','.join([unzipped_fname, '1', str(datetime.now())+'\n']))
@@ -109,7 +105,7 @@ def download(link, n_items=None):
 
 def move_to_s3(filename):
     '''
-    DOCSTRING: move_to_s3
+    DOCSTRING: move_to_s3(filename)
 
     Move .zip files to S3.  Print to csv: timestamp, filename, success(1/0)
 
