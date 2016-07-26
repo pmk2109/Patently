@@ -8,10 +8,15 @@ from sklearn.metrics.pairwise import linear_kernel
 import cPickle as pickle
 import time
 import msgpack
-import gensim, logging
 from nltk.corpus import stopwords
+from init_sql import PatentDatabase
 
-# logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+def load_data_sql():
+    pdb = PatentDatabase()
+    return pdb
+
+
+
 
 
 def load_data(path=None):
@@ -34,7 +39,7 @@ def load_data(path=None):
     df = pd.read_csv(path)
     df.fillna("", inplace=True)
 
-    df['pruned_desc'] = [w.lower().strip(string.punctuation) for w in df.description.values if not w.isdigit()]
+    df['pruned_desc'] = [w.lower().strip(string.punctuation) for w in df.description.values]# if not w.isdigit()]
     df['pruned_desc_str'] = df.pruned_desc.apply(lambda x: " ".join(x))
     df['flat_claims'] = [[e.strip(string.punctuation) for e in w.lower().split()] for w in df.claims.values]
     df['flat_claims_str'] = df.flat_claims.apply(lambda x: " ".join(x))
@@ -92,9 +97,11 @@ def get_similarity(vocab, idea, n_items=5):
     sorted_ind = ind[np.argsort(cs_array[ind])][::-1]
     scores = cs_array[sorted_ind]
     indices = sorted_ind
+    # print indices
+    indices = np.array(indices)+1
+    # print indices
 
-
-    return scores, indices
+    return scores, tuple(indices)
 
 
 
@@ -118,7 +125,11 @@ def main():
     if pkl == 'True':
         try:
             print 'Loading data...'
-            df = load_data(path)
+            # df = load_data(path)
+            # pdb = load_data_sql()
+
+            pdb = PatentDatabase()
+            df = pdb.query_sql('''SELECT total FROM total_parsed_data;''')
             total_tfidf, tfidf = vectorize(df.total.values)
 
         except:
@@ -127,48 +138,50 @@ def main():
 
         print 'Pickling data...'
 
-        # think about writing a pickle function that loops
-        # over a set of items passed in
-
         pickle.dump(total_tfidf, open('../data/total_tfidf.p', 'wb'))
         pickle.dump(tfidf, open('../data/tfidf.p', 'wb'))
-        df.to_msgpack('../data/dataframe.p')
+        # df.to_msgpack('../data/dataframe.p')
         print 'Finished pickling...'
 
     elif pkl == 'False':
         print 'Unpickling data...'
-        abstracts_tfidf = pickle.load(open('../data/abstracts_tfidf.p', 'rb'))
+        total_tfidf = pickle.load(open('../data/total_tfidf.p', 'rb'))
         tfidf = pickle.load(open('../data/tfidf.p', 'rb'))
-        df = pd.read_msgpack('../data/dataframe.p')
+        # df = pd.read_msgpack('../data/dataframe.p')
     else:
         print "Second argument to pickle must be [True/False]"
         return
 
-    toc = time.clock()
     print 'User input (hardcoded)'
     text = 'Blood coagulation cold plasma device that kills bacteria'
     new_text_tfidf = vectorize([text], tfidf)
 
     print 'Getting similarity...'
-    scores, indices = get_similarity(abstracts_tfidf, new_text_tfidf, 5)
+    scores, indices = get_similarity(total_tfidf, new_text_tfidf, 5)
 
     '''
     [Index([u'doc_number', u'date', u'publication_type', u'patent_length', u'title',
        u'abstract', u'description', u'claims']
     '''
-    df_results = df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
-    df_results['score'] = scores
-    print df_results
-    print time.clock() - tic
+    # df_results = df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
+    # df_results['score'] = scores
+    # print df_results
 
 
 
+    s = '''
+    SELECT index, doc_number, date, title, abstract FROM total_parsed_data
+    WHERE index in {};
+    '''.format(indices)
+
+    df = pdb.query_sql(s)
+    df_scores = pd.DataFrame(zip(indices, scores), columns=['index', 'score'])
+
+    df_joined = pd.merge(df, df_scores, how='inner', on='index')
+    df_joined.drop(['index'], axis=1, inplace=True)
+    print df_joined.sort_values(by='score', axis=0, ascending=False)
 
 
-
-
-
-    return
 
 
 if __name__ == '__main__':

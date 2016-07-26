@@ -10,35 +10,6 @@ import time
 import msgpack
 import os
 
-def load_data(path=None):
-    '''
-    DOCSTRING: load_data(path=None)
-
-    Given the 'subset' or 'total' parameter, find the respective .csv file,
-    read into a csv, parse out relevant fields and pickle the relevant objects.
-
-    Returns: Dataframe object, abstracts array, descriptions array, claims array
-    '''
-    if path == 'subset':
-        path = '../data/total_parsed_data_subset.csv'
-    elif path == 'total':
-        path = '../data/total_parsed_data.csv'
-    else:
-        print "ERROR: pass a valid path to data as a parameter"
-        return
-
-    df = pd.read_csv(path)
-    df.fillna("", inplace=True)
-
-
-    abstracts = df.abstract.values
-    descriptions = df.description.values
-    claims = df.claims.values
-
-    return df, abstracts, descriptions, claims
-
-
-
 
 def vectorize(text, tfidf=None):
     '''
@@ -88,8 +59,8 @@ def get_similarity(vocab, idea, n_items=5):
     sorted_ind = ind[np.argsort(cs_array[ind])][::-1]
     scores = cs_array[sorted_ind]
     indices = sorted_ind
-
-    return scores, indices
+    indices = np.array(indices)+1
+    return scores, tuple(indices)
 
 
 
@@ -104,15 +75,17 @@ def unpickle():
     Returns: dataframe, [abstract/total] tfidf matrix, tfidf model
     '''
     path = os.path.dirname(__file__)
-    abstracts_tfidf = pickle.load(open(path+'/../data/abstracts_tfidf.p', 'rb'))
+    total_tfidf = pickle.load(open(path+'/../data/total_tfidf.p', 'rb'))
     tfidf = pickle.load(open(path+'/../data/tfidf.p', 'rb'))
-    df = pd.read_msgpack(path+'/../data/dataframe.p')
+    # df = pd.read_msgpack(path+'/../data/dataframe.p')
 
-    return df, abstracts_tfidf, tfidf
+    return total_tfidf, tfidf
 
 
 
-def assemble_results(user_text, num_results, tfidf, matrix, df):
+
+
+def assemble_results(pdb, user_text, num_results, tfidf, matrix):
     '''
     DOCSTRING: assemble_results(user_text, num_results, tfidf, matrix, dataframe)
 
@@ -130,8 +103,16 @@ def assemble_results(user_text, num_results, tfidf, matrix, df):
     [Index([u'doc_number', u'date', u'publication_type', u'patent_length', u'title',
        u'abstract', u'description', u'claims']
     '''
-    df_results = df.loc[indices][['doc_number', 'date', 'title', 'abstract']]
-    df_results['score'] = scores
 
+    s = '''
+    SELECT doc_number, date, title, abstract FROM total_parsed_data
+    WHERE index in {};
+    '''.format(indices)
 
-    return df_results.to_dict(orient='records')
+    df = pdb.query_sql(s)
+    df_scores = pd.DataFrame(zip(indices, scores), columns=['index', 'score'])
+
+    df_joined = pd.merge(df, df_scores, how='inner', on='index')
+    df_joined.drop(['index'], axis=1, inplace=True)
+    df_sorted = df_joined.sort_values(by='score', axis=0, ascending=False)
+    return df_sorted.to_dict(orient='records')

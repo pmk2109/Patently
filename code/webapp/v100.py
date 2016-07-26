@@ -14,8 +14,9 @@ sys.path.append('../')
 # scoring function to return the appropriate object.
 
 import use_model
+from init_sql import PatentDatabase
 
-df, abstracts_tfidf, tfidf = use_model.unpickle()
+total_tfidf, tfidf = use_model.unpickle()
 # user_text -- how to generate/store this?
  #-- think about how this may be implemented (NOT NECESSARY AT THE MOMENT)
 
@@ -52,9 +53,9 @@ def return_patent_similarity():
 
     user_text = [request.args['q']]
     num_results = 5
-
-    results = use_model.assemble_results(user_text, num_results, tfidf,
-                                     abstracts_tfidf, df)
+    pdb = PatentDatabase()
+    results = use_model.assemble_results(pdb, user_text, num_results, tfidf,
+                                     total_tfidf)
 
     '''
     EXAMPLE RESULTS:
@@ -104,7 +105,21 @@ def return_patent_similarity():
 
     d = {'results' : results}
 
-    return jsonify(d)
+    lst = []
+    for e in d.values():
+        for f in e:
+            if float(f['score']) > 0.1:
+                lst.append(f)
+
+    d = {'results' : lst}
+
+    for elem in d.values():
+        for item in elem:
+            item['link'] = "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&Sect2=HITOFF&d=PALL&p=1&u=%2Fnetahtml%2FPTO%2Fsrchnum.htm&r=1&f=G&l=50&s1={0}.PN.&OS=PN/{0}&RS=PN/{0}".format(item['doc_number'][1:])
+
+    response = jsonify(d)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 

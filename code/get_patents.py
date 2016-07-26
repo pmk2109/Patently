@@ -11,6 +11,7 @@ from urllib import urlopen, urlretrieve, quote
 from urlparse import urljoin
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
+import pandas as pd
 
 #assign paths to global variables
 ZIP_PATH = '../code'
@@ -42,7 +43,7 @@ def get_data(url):
     finally:
         u.close()
 
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, "lxml")
     # p = Pool(40)
     # results = p.map(download, soup.select('a'))
 
@@ -50,7 +51,7 @@ def get_data(url):
         download(link)
     #this works ... but keep in mind, this will be contrained by
     #network speeds rather than CPUs... so run on
-    return
+        return
 
 
 
@@ -75,6 +76,17 @@ def download(link):
         href = link.get('href')
         filename = href.rsplit('/', 1)[-1]
         href = urljoin(url, quote(href))
+
+        df_err = pd.read_csv('get_data_logfile.csv')
+        already_dw = df_err.filename.apply(lambda x: x[:-4]+'.zip')
+        already_dw = already_dw.values
+        print df_err
+        if filename in already_dw:
+            print filename
+            return
+
+        return
+
         try:
             urlretrieve(href, filename)
             zip_ref = zipfile.ZipFile(ZIP_PATH+'/'+filename, 'r')
