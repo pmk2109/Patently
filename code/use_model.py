@@ -2,13 +2,14 @@ import pandas as pd
 import numpy as np
 import string
 import sys
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, HashingVectorizer, TfidfTransformer
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.metrics.pairwise import linear_kernel
 import cPickle as pickle
 import time
 import msgpack
 import os
+from sklearn.pipeline import make_pipeline
 
 
 def vectorize(text, tfidf=None):
@@ -21,10 +22,15 @@ def vectorize(text, tfidf=None):
 
     Returns: (fit_transformed text, tfidf object), (transformed text, __)
     '''
+    #stemmer = SnowballStemmer('english')
+
+    #processed_text = [" ".join([stemmer.stem(word) for word in words.split()]) for words in text]
+
     if tfidf:
         return tfidf.transform(text)
     elif tfidf is None:
-        tfidf = TfidfVectorizer(stop_words='english')
+        hasher = HashingVectorizer(stop_words='english', norm=None, non_negative=True)
+        tfidf = make_pipeline(hasher, TfidfTransformer())
         return tfidf.fit_transform(text), tfidf
 
 
@@ -105,8 +111,8 @@ def assemble_results(pdb, user_text, num_results, tfidf, matrix):
     '''
 
     s = '''
-    SELECT doc_number, date, title, abstract FROM total_parsed_data
-    WHERE index in {};
+    SELECT index, doc_number, date, title, abstract FROM total_parsed_data
+    WHERE index in {} ORDER BY index LIMIT 1000000;
     '''.format(indices)
 
     df = pdb.query_sql(s)

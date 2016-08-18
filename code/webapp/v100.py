@@ -52,7 +52,7 @@ def return_patent_similarity():
     '''
 
     user_text = [request.args['q']]
-    num_results = 5
+    num_results = 50
     pdb = PatentDatabase()
     results = use_model.assemble_results(pdb, user_text, num_results, tfidf,
                                      total_tfidf)
@@ -115,7 +115,11 @@ def return_patent_similarity():
 
     for elem in d.values():
         for item in elem:
-            item['link'] = "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&Sect2=HITOFF&d=PALL&p=1&u=%2Fnetahtml%2FPTO%2Fsrchnum.htm&r=1&f=G&l=50&s1={0}.PN.&OS=PN/{0}&RS=PN/{0}".format(item['doc_number'][1:])
+            if item['doc_number'][0] == 'D':
+                doc_num = item['doc_number'][0] + item['doc_number'][2:]
+            else:
+                doc_num = item['doc_number'][1:]
+            item['link'] = "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&Sect2=HITOFF&d=PALL&p=1&u=%2Fnetahtml%2FPTO%2Fsrchnum.htm&r=1&f=G&l=50&s1={0}.PN.&OS=PN/{0}&RS=PN/{0}".format(doc_num)
 
     response = jsonify(d)
     response.headers.add('Access-Control-Allow-Origin', '*')

@@ -3,7 +3,7 @@ import cPickle as pickle
 
 def load_data(path=None):
     '''
-    DOCSTRING: load_data(path=None)
+    DOCSTRING: load_data
 
     Given the 'subset' or 'total' parameter, find the respective .csv file,
     read into a csv, parse out relevant fields and pickle the relevant objects.

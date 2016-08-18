@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 import string
 import sys
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, HashingVectorizer, TfidfTransformer
+from sklearn.pipeline import make_pipeline
+from collections import defaultdict, Counter
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.metrics.pairwise import linear_kernel
 import cPickle as pickle
@@ -50,7 +52,7 @@ def load_data(path=None):
 
 
 
-def vectorize(text, tfidf=None):
+def vectorize(text, tfidf=None, vocabulary=None):
     '''
     DOCSTRING: vectorize(text, tfidf=None)
 
@@ -60,10 +62,22 @@ def vectorize(text, tfidf=None):
 
     Returns: (fit_transformed text, tfidf object), (transformed text, __)
     '''
+
+    
+    print "Set up vectorizer..."
+    #stemmer = SnowballStemmer('english')
+    #processed_text = [" ".join([stemmer.stem(word) for word in words.split()]) for words in text]
+    
     if tfidf:
         return tfidf.transform(text)
     elif tfidf is None:
-        tfidf = TfidfVectorizer(stop_words='english')
+	tfidf = TfidfVectorizer(stop_words='english', vocabulary=vocabulary)#, 
+                #ngram_range=(1,2)) 
+        #print tfidf
+        #hasher = HashingVectorizer(stop_words='english', norm=None, non_negative=True)
+        #tfidf = make_pipeline(hasher, TfidfTransformer())
+        
+        print "Get into vectorizer..."
         return tfidf.fit_transform(text), tfidf
 
 
@@ -97,9 +111,9 @@ def get_similarity(vocab, idea, n_items=5):
     sorted_ind = ind[np.argsort(cs_array[ind])][::-1]
     scores = cs_array[sorted_ind]
     indices = sorted_ind
-    # print indices
+    #print indices
     indices = np.array(indices)+1
-    # print indices
+    #print indices
 
     return scores, tuple(indices)
 
@@ -123,18 +137,38 @@ def main():
 
 
     if pkl == 'True':
-        try:
-            print 'Loading data...'
-            # df = load_data(path)
-            # pdb = load_data_sql()
+        
+	print 'Loading data...'
+        # df = load_data(path)
+        # pdb = load_data_sql()
 
-            pdb = PatentDatabase()
-            df = pdb.query_sql('''SELECT total FROM total_parsed_data;''')
-            total_tfidf, tfidf = vectorize(df.total.values)
+        pdb = PatentDatabase()
+        print "Getting from DB"
+        df = pdb.query_sql('''SELECT total FROM total_parsed_data;''')
+        print "Length of df...{}".format(len(df.total.values))
+        
+        print "Build vocab..."
+        d = defaultdict(int)
+        dummy = 0
+        for words in df.total.values:
+            dummy += 1
+            if dummy % 10000 == 0:
+                print "Length of vocab at total {}: {}".format(dummy, len(d))
+            for word in words.split():
+                d[word] += 1
 
-        except:
-            print 'Error loading data!'
-            return
+        c = Counter(d)
+        vocab_list = []
+        for item in c.most_common(600000):
+            vocab_list.append(item[0])
+
+        print "Putting in vectorizer..."
+        
+
+
+        total_tfidf, tfidf = vectorize(df.total.values, vocabulary=vocab_list)
+
+
 
         print 'Pickling data...'
 
@@ -144,6 +178,7 @@ def main():
         print 'Finished pickling...'
 
     elif pkl == 'False':
+        pdb = PatentDatabase()
         print 'Unpickling data...'
         total_tfidf = pickle.load(open('../data/total_tfidf.p', 'rb'))
         tfidf = pickle.load(open('../data/tfidf.p', 'rb'))
@@ -168,13 +203,18 @@ def main():
     # print df_results
 
 
+    #takes subset 5min to get to pickling..
+    #takes subset 8min to finish
 
+    #by this measure this should be 5*14=70min to get to pickling
+    #and 8*14=113min to finish
     s = '''
     SELECT index, doc_number, date, title, abstract FROM total_parsed_data
     WHERE index in {};
     '''.format(indices)
-
+    #print indices
     df = pdb.query_sql(s)
+    #print df.title.values
     df_scores = pd.DataFrame(zip(indices, scores), columns=['index', 'score'])
 
     df_joined = pd.merge(df, df_scores, how='inner', on='index')

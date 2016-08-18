@@ -46,22 +46,19 @@ def put_into_one_db(pdb, path, paths, out):
         for p in paths:
             df = pd.read_csv(path+p)
             df.fillna("", inplace=True)
-            df['pruned_desc'] = [w.lower().strip(string.punctuation) for w in df.description.values]# if not w.isdigit()]
-            df['pruned_desc_str'] = df.pruned_desc.apply(lambda x: " ".join(x))
+            df['pruned_abst'] = [[y.lower().strip(string.punctuation) for y in w] for w in df.abstract.values]
+	    df['pruned_abst_str'] = df.pruned_abst.apply(lambda x: "".join(x))
+	    df['pruned_desc'] = [[y.lower().strip(string.punctuation) for y in w] for w in df.description.values]# if not w.isdigit()]
+            df['pruned_desc_str'] = df.pruned_desc.apply(lambda x: "".join(x))
             df['flat_claims'] = [[e.strip(string.punctuation) for e in w.lower().split()] for w in df.claims.values]
             df['flat_claims_str'] = df.flat_claims.apply(lambda x: " ".join(x))
-            df['total'] = df.abstract + " " + df.pruned_desc_str + " " + df.flat_claims_str
+            df['total'] = df.pruned_abst_str + " " + df.pruned_desc_str + " " + df.flat_claims_str
 
-            drop_cols = ['pruned_desc', 'pruned_desc_str', 'flat_claims', 'flat_claims_str']
+            drop_cols = ['pruned_abst', 'pruned_abst_str', 'pruned_desc', 'pruned_desc_str', 'flat_claims', 'flat_claims_str']
             pdb.write_to_sql(df.drop(drop_cols, axis=1), out)
 
-            break #take this out when i run the full thing
-            # some general ideas:  run stem or whatever other preprocessing
-            # so that this may take some time to run but the feature space
-            # gets reduced for the model building part ...
+            #break #take this out when i run the full thing
 
-            #or something else entirely?
-            
         return
 
 

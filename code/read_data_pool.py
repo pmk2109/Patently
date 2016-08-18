@@ -352,7 +352,7 @@ def write_row(root):
 
 
         for c in child:
-            if c.tag == 'publication-reference':   #think about getting filing data too... that will be important as US is now first-to-file
+            if c.tag == 'publication-reference':
                 for e in c:
                     for a in e:
                         if a.tag == 'date':

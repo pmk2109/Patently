@@ -1,3 +1,4 @@
+import pandas as pd
 import multiprocessing
 import re
 import zipfile
@@ -11,11 +12,10 @@ from urllib import urlopen, urlretrieve, quote
 from urlparse import urljoin
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
-import pandas as pd
 
 #assign paths to global variables
 ZIP_PATH = '../code'
-EXTRACT_DATA_PATH = '../data'
+EXTRACT_DATA_PATH = '../data_xml'
 DATA_PATH = '../data/ipg160628.xml'
 
 #this is the current repo of all available patents (1976-present)
@@ -24,7 +24,7 @@ url = 'http://patents.reedtech.com/pgrbft.php'
 
 def get_data(url):
     '''
-    DOCSTRING: get_data(url)
+    DOCSTRING: get_data
 
     Collect data from provided url (in this case Reed Tech) in the form
     of .zip files, extract and move to S3 Bucket named 'patentgrants'
@@ -51,15 +51,15 @@ def get_data(url):
         download(link)
     #this works ... but keep in mind, this will be contrained by
     #network speeds rather than CPUs... so run on
-        return
+    return
 
 
 
-def download(link):
+def download(link, n_items=None):
     '''
-    DOCSTRING: download(link)
+    DOCSTRING: download
 
-    For a given BeautifulSoup link, find .zip files
+    For a given BeautifulSoup iterable, find .zip files
     on the Reed Tech site, retrieve them, extract them,
     and remove the original zip file from the HD.
 
@@ -75,18 +75,15 @@ def download(link):
     if link.text[-4:] == '.zip':
         href = link.get('href')
         filename = href.rsplit('/', 1)[-1]
-        href = urljoin(url, quote(href))
-
-        df_err = pd.read_csv('get_data_logfile.csv')
-        already_dw = df_err.filename.apply(lambda x: x[:-4]+'.zip')
-        already_dw = already_dw.values
-        print df_err
-        if filename in already_dw:
-            print filename
-            return
-
-        return
-
+        #df_err = pd.read_csv('get_data_logfile.csv')
+	#already_dw = df_err.filename.apply(lambda x: x[:-4]+".zip")
+	#already_dw = already_dw.values
+	#print already_dw
+	#return
+	#if filename in already_dw:
+	#    return
+        print filename
+	href = urljoin(url, quote(href))
         try:
             urlretrieve(href, filename)
             zip_ref = zipfile.ZipFile(ZIP_PATH+'/'+filename, 'r')
@@ -95,6 +92,10 @@ def download(link):
 
             os.remove(filename)
             unzipped_fname = filename.split('.')[0] + '.xml'
+
+            # move_to_s3(unzipped_fname)
+
+            # os.remove(EXTRACT_DATA_PATH + '/' + unzipped_fname)
 
             #write to csv if it succeeded
             log = open('get_data_logfile.csv','a')
@@ -117,7 +118,7 @@ def download(link):
 
 def move_to_s3(filename):
     '''
-    DOCSTRING: move_to_s3(filename)
+    DOCSTRING: move_to_s3
 
     Move .zip files to S3.  Print to csv: timestamp, filename, success(1/0)
 
