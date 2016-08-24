@@ -1,0 +1,251 @@
+#Patent ASCII Section Mappings
+
+section_headers = ['PTN','INVT','ASSG','PRIR',
+                   'REIS','CLAS','RLAP','LREP',
+                   'UREF','FREF','OREF','ABST',
+                   'GOVT','PARN','DRWD','DETD',
+                   'CLMS']
+
+pat_info_headers = {'PTN':'Patent Bibliographic Information',
+                        'WKU':'Patent Number',
+                        'SRC':'Series Code',
+                        'APN':'Application Number',
+                        'APT':'Application Type',
+                        'PBL':'Publication Level',
+                        'ART':'Art Unit',
+                        'APD':'Application Filing Date',
+                        'TTL':'Title of Invention',
+                        'ISD':'Issue Date',
+                        'NCL':'Number of Claims',
+                        'ECL':'Exemplary Claim Numbers',
+                        'EXA':'Assistant Examiner',
+                        'EXP':'Primary Examiner',
+                        'NDR':'Number of Drawing Sheets',
+                        'NFG':'Number of Figures',
+                        'DCD':'Disclaimer Date',
+                        'NPS':'Number of Pages of Specifications',
+                        'TRM':'Term of Patent'}
+
+inventor_headers = {'INVT':'Inventor',
+                        'NAM':'Inventor Name',
+                        'STR':'Street',
+                        'CTY':'City',
+                        'STA':'State',
+                        'CNT':'Country',
+                        'ZIP':'Zip Code',
+                        'R47':'Rule 47 Indicator',
+                        'ITX':' Inventory Desc test'}
+
+assignee_headers = {'ASSG':'Assingee',
+                        'STR':'Street',
+                        'CTY':'City',
+                        'STA':'State',
+                        'CNT':'Country',
+                        'ZIP':'Zip Code',
+                        'R47':'Rule 47 Indicator',
+                        'ITX':' Inventory Desc test'}
+
+foreign_priority = {'PRIR': 'Foreign Priority',
+                       'CNT':'Country Code',
+                        'APD':'Prior App Date',
+                        'APN':'Prior App Num'}
+
+reissue_info = {'REIS':'Reissue Info',
+               'COD':'Reissue Code',
+               'APN':'Application Number',
+               'APD':'Application Filing Date',
+               'PNO':'Patent Number',
+               'ISD':'Issue Date'}
+
+classification_info = {'CLAS':'Classification',
+                      'OCL':'US Classifcation',
+                        'XCL':'Cross Ref',
+                        'UCL':'Unofficial Ref',
+                      'DCL':'Digest Ref',
+                      'EDF':'Edition Field',
+                      'ICL':'International Class',
+                      'FSC':'Field of Search Class',
+                      'FSS':'Field of Search sub-class'}
+
+related_pat_info = {'RLAP':'Related Application Data',
+                   'COD':'Reissue Code',
+                   'APN':'Application Number',
+                   'APD':'Application Filing Date',
+                   'PNO':'Patent Number',
+                   'ISD':'Issue Date',
+                    'PSC':'Pat Status Code'}
+
+legal_info = {'LREP':'Legal Rep Info',
+             'FRM':'Firm Name',
+             'FR2':'Prin Attr Name',
+             'AAT':'Ass Att Name',
+             'AGT':'Agent Name',
+             'ATT':'Att Name',
+             'REG':'Reg Num',
+             'NAM':'Rep Name',
+             'STR':'Street',
+             'CTY':'City',
+             'STA':'State',
+             'CNT':'Country',
+             'ZIP':'Zip Code',}
+
+US_ref = {'UREF':'US Reference',
+            'PNO':'Patent Num',
+            'ISD':'Issue Date',
+            'NAM':'Patentee Name',
+            'OCL':'US Classifcation',
+            'XCL':'Cross Ref',
+            'UCL':'Unofficial Ref'}
+
+fore_ref = {'FREF':'Foreign Reference',
+            'PNO':'Patent Num',
+            'ISD':'Issue Date',
+            'OCL':'Classifcation',
+            'CNT':'Country'}
+
+prior_art_ref = {'OREF':'Other Prior Art Ref',
+                'PAL':'Paragraph Info'}
+
+abst_info = {'ABST': 'Abstract Info',
+            'PA': 'Paragraph Info'}
+
+govt_int = {'GOVT': 'Government Interest',
+            'PA': 'Paragraph Info'}
+
+parent_case = {'PARN':'Parent Case',
+               'PA': 'Paragraph Info'}
+
+drawing_desc = {'DRWD': 'Drawing Description',
+                'PA': 'Paragraph Info'}
+
+detail_desc = {'DETD':'Detail Description',
+              'PA':'Paragraph Info'}
+
+claims_info = {'CLMS':'Claims Information',
+                'STM':'Claims Statement',
+                'NUM':'Claims Number',
+                'PA':'Claim Text Data Paragraphs'}
+
+sections = [pat_info_headers,inventor_headers,claims_info,
+            detail_desc, drawing_desc, parent_case, govt_int,
+            abst_info, prior_art_ref, fore_ref, US_ref, legal_info,
+            related_pat_info, reissue_info, classification_info,
+            assignee_headers, foreign_priority, inventor_headers]
+
+            Pat_struct =
+            {'PTN':{
+                'WKU':'Patent Number',
+                'SRC':'Series Code',
+                'APN':'Application Number',
+                'APT':'Application Type',
+                'PBL':'Publication Level',
+                'ART':'Art Unit',
+                'APD':'Application Filing Date',
+                'TTL':'Title of Invention',
+                'ISD':'Issue Date',
+                'NCL':'Number of Claims',
+                'ECL':'Exemplary Claim Numbers',
+                'EXA':'Assistant Examiner',
+                'EXP':'Primary Examiner',
+                'NDR':'Number of Drawing Sheets',
+                'NFG':'Number of Figures',
+                'DCD':'Disclaimer Date',
+                'NPS':'Number of Pages of Specifications',
+                'TRM':'Term of Patent'
+                },
+            'INVT':{
+                'NAM':'Inventor Name',
+                'STR':'Street',
+                'CTY':'City',
+                'STA':'State',
+                'CNT':'Country',
+                'ZIP':'Zip Code',
+                'R47':'Rule 47 Indicator',
+                'ITX':' Inventory Desc test'
+                },
+            'ASSG':{
+                'STR':'Street',
+                'CTY':'City',
+                'STA':'State',
+                'CNT':'Country',
+                'ZIP':'Zip Code',
+                'R47':'Rule 47 Indicator',
+                'ITX':' Inventory Desc test'
+                    },
+            'PRIR':{
+                'CNT':'Country Code',
+                'APD':'Prior App Date',
+                'APN':'Prior App Num'
+                },
+            'REIS':{
+               'COD':'Reissue Code',
+               'APN':'Application Number',
+               'APD':'Application Filing Date',
+               'PNO':'Patent Number',
+               'ISD':'Issue Date'
+                },
+            'CLAS':{
+               'OCL':'US Classifcation',
+               'XCL':'Cross Ref',
+               'UCL':'Unofficial Ref',
+               'DCL':'Digest Ref',
+               'EDF':'Edition Field',
+               'ICL':'International Class',
+               'FSC':'Field of Search Class',
+               'FSS':'Field of Search sub-class'
+                },
+            'RLAP':{
+               'COD':'Reissue Code',
+               'APN':'Application Number',
+               'APD':'Application Filing Date',
+               'PNO':'Patent Number',
+               'ISD':'Issue Date',
+               'PSC':'Pat Status Code'
+                },
+            'LREP':{
+                'FRM':'Firm Name',
+                'FR2':'Prin Attr Name',
+                'AAT':'Ass Att Name',
+                'AGT':'Agent Name',
+                'ATT':'Att Name',
+                'REG':'Reg Num',
+                'NAM':'Rep Name',
+                'STR':'Street',
+                'CTY':'City',
+                'STA':'State',
+                'CNT':'Country',
+                'ZIP':'Zip Code',
+                },
+            'UREF':{
+                'PNO':'Patent Num',
+                'ISD':'Issue Date',
+                'NAM':'Patentee Name',
+                'OCL':'US Classifcation',
+                'XCL':'Cross Ref',
+                'UCL':'Unofficial Ref'
+                },
+            'FREF':{
+                'PNO':'Patent Num',
+                'ISD':'Issue Date',
+                'OCL':'Classifcation',
+                'CNT':'Country'
+                },
+            'OREF':{
+                'PAL':'Paragraph Info'
+                },
+            'ABST':{
+                'PA': 'Paragraph Info'},
+            'GOVT':{
+                'PA': 'Paragraph Info'},
+            'PARN':{
+                'PA': 'Paragraph Info'},
+            'DRWD':{
+                'PA': 'Paragraph Info'},
+            'DETD':{
+                'PA':'Paragraph Info'},
+            'CLMS':{
+                'STM':'Claims Statement',
+                'NUM':'Claims Number',
+                'PA':'Claim Text Data Paragraphs'
+                }
+            }
