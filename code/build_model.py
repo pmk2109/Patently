@@ -63,20 +63,20 @@ def vectorize(text, tfidf=None, vocabulary=None):
     Returns: (fit_transformed text, tfidf object), (transformed text, __)
     '''
 
-    
+
     print "Set up vectorizer..."
     #stemmer = SnowballStemmer('english')
     #processed_text = [" ".join([stemmer.stem(word) for word in words.split()]) for words in text]
-    
+
     if tfidf:
         return tfidf.transform(text)
     elif tfidf is None:
-	tfidf = TfidfVectorizer(stop_words='english', vocabulary=vocabulary)#, 
-                #ngram_range=(1,2)) 
+	tfidf = TfidfVectorizer(stop_words='english', vocabulary=vocabulary)#,
+                #ngram_range=(1,2))
         #print tfidf
         #hasher = HashingVectorizer(stop_words='english', norm=None, non_negative=True)
         #tfidf = make_pipeline(hasher, TfidfTransformer())
-        
+
         print "Get into vectorizer..."
         return tfidf.fit_transform(text), tfidf
 
@@ -137,7 +137,7 @@ def main():
 
 
     if pkl == 'True':
-        
+
 	print 'Loading data...'
         # df = load_data(path)
         # pdb = load_data_sql()
@@ -146,7 +146,7 @@ def main():
         print "Getting from DB"
         df = pdb.query_sql('''SELECT total FROM total_parsed_data;''')
         print "Length of df...{}".format(len(df.total.values))
-        
+
         print "Build vocab..."
         d = defaultdict(int)
         dummy = 0
@@ -162,10 +162,16 @@ def main():
         for item in c.most_common(600000):
             vocab_list.append(item[0])
 
-        print "Putting in vectorizer..."
+
+        #Remove dupes
+        #try getting a set for df.total.values... this ought to trim exact dupes
+        #another method may be getting titles and their respective indices,
+        #   then running a set on that and grabbing the resulting indices from
+        #   the total, rather than the full SELECT total...
         
 
 
+        print "Putting in vectorizer..."
         total_tfidf, tfidf = vectorize(df.total.values, vocabulary=vocab_list)
 
 

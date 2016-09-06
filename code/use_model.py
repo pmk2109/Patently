@@ -121,4 +121,5 @@ def assemble_results(pdb, user_text, num_results, tfidf, matrix):
     df_joined = pd.merge(df, df_scores, how='inner', on='index')
     df_joined.drop(['index'], axis=1, inplace=True)
     df_sorted = df_joined.sort_values(by='score', axis=0, ascending=False)
+    df_sorted.drop_duplicates(subset='title', keep='first', inplace=True)
     return df_sorted.to_dict(orient='records')

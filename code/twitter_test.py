@@ -1,7 +1,11 @@
+import tweepy
+import os
 import re
 import random
 import csv
 import sys
+import time
+from init_sql import PatentDatabase
 
 csv.field_size_limit(sys.maxsize)
 
@@ -20,6 +24,22 @@ mapping = {}
 
 # Contains the set of words that can start sentences
 starts = []
+
+
+class TwitterAPI:
+    def __init__(self):
+        consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+        consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        access_token = os.environ['TWITTER_ACCESS_TOKEN']
+        access_token_secret = os.environ['TWITTER_ACCESS_SECRET']
+        auth.set_access_token(access_token, access_token_secret)
+        self.api = tweepy.API(auth)
+
+    def tweet(self, message):
+        self.api.update_status(status=message)
+
+
 
 # We want to be able to compare words independent of their capitalization.
 def fix_caps(word):
@@ -46,7 +66,6 @@ def wordlist(filename):
         f = csv.reader(csvfile, delimiter = ',')
         for row in f:
             for word in re.findall(r"[\w']+|[.,!?;]", row[5]):
-                print fix_caps(word)
                 word_list.append(fix_caps(word))
 
         # word_list = [fix_caps(word) for row in f for word in re.findall(r"[\w']+|[.,!?;]", row[5])]
@@ -141,12 +160,60 @@ def gen_tweet(markovLength):
         tweet.append(sentence)
     return ' '.join(tweet)
 
-def main(file_, tweet_len):
+def all_together_now(file_, tweet_len):
     filename = file_
     markovLength = int(tweet_len)
     build_mapping(wordlist(filename), markovLength)
 
-    print gen_tweet(markovLength)
+    # length_satisfied = False
+    # while length_satisfied == False:
+    #     tweet = gen_tweet(markovLength)
+    #     print type(tweet), len(tweet), tweet
+    #     if len(tweet) < 12:
+    #         pass
+    #     else:
+    #         length_satisfied = True
+
+    return gen_tweet(markovLength)
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
-    main('../data/total_parsed_data_subset.csv', 3)
+    twitter = TwitterAPI()
+
+    s = '''
+    SELECT abstract FROM total_parsed_data
+    '''
+
+    pdb = PatentDatabase()
+    df = pdb.query_sql(s)
+    data_path = '../data/markov_data.csv'
+    df.to_csv(data_path)
+    
+    _ = all_together_now(data_path, 3)
+
+    # tweet = gen_tweet(10)
+    minutes = 0
+    while minutes < 10:
+        length_satisfied = False
+        while length_satisfied == False:
+            tweet_string = gen_tweet(25)
+            # print type(tweet), len(tweet), tweet
+            if len(tweet_string) < 20:
+                pass
+            else:
+                length_satisfied = True
+
+        twitter.tweet(tweet_string)
+        time.sleep(60)
+        minutes+=1
